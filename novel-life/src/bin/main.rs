@@ -1,5 +1,6 @@
 use std::io::Write;
 use crossterm::{cursor, ExecutableCommand};
+use rand::distributions::{Distribution, Uniform};
 
 fn main() {
 //     let s = "........
@@ -10,14 +11,17 @@ fn main() {
 // ........";
     // let universe = parse(s);
 
-    let mut universe = Universe{ cells: vec![vec![LCell{ state: State::Dead }; 30]; 30] };
-
-    universe.cells[15][15].state = State::Alive;
-    universe.cells[15][14].state = State::Alive;
-    universe.cells[15][16].state = State::Alive;
-
-    let history = simulate_with_history(&universe, 10);
+    let universe = Universe{ cells: vec![vec![LCell{ state: State::Dead }; 30]; 30] };
+    let individual = Individual{ cells: vec![vec![LCell{ state: State::Dead }; 5]; 5] };
+    let individual = mutate(&individual, 0.1);
+    let universe = seed(&universe, &individual.cells, 12, 12);
+    let history = simulate_with_history(&universe, 100);
     visualize(history);
+}
+
+#[derive(Clone)]
+struct Individual {
+    cells: Vec<Vec<LCell>>,
 }
 
 fn parse(s: &str) -> Universe {
@@ -65,7 +69,7 @@ fn step(u: &Universe) -> Universe {
 }
 
 fn simulate(u: &Universe, k: usize) -> Universe {
-    let mut u = u.to_owned();
+    let mut u = u.clone();
     for _ in 0..k {
         u = step(&u);
     }
@@ -74,7 +78,7 @@ fn simulate(u: &Universe, k: usize) -> Universe {
 
 fn simulate_with_history(u: &Universe, k: usize) -> Vec<Universe> {
     let mut history = Vec::new();
-    let mut u = u.to_owned();
+    let mut u = u.clone();
     history.push(u.clone());
     for _ in 0..k {
         u = step(&u);
@@ -98,6 +102,35 @@ fn visualize(history: Vec<Universe>) {
         }
         std::thread::sleep(std::time::Duration::from_millis(200));
     }
+}
+
+fn seed(u: &Universe, seed: &Vec<Vec<LCell>>, row_offset: usize, col_offset: usize) -> Universe {
+    let mut u = u.clone();
+    for row in 0..seed.len() {
+        for col in 0..seed[0].len() {
+            u.cells[row_offset + row][col_offset + col] = seed[row][col];
+        }
+    }
+    u
+}
+
+fn mutate(ind: &Individual, p: f32) -> Individual {
+    let mut ind = ind.clone();
+    let mut rng = rand::thread_rng();
+    let n_rows = ind.cells.len();
+    let n_cols = ind.cells[0].len();
+    let n = (p * n_rows as f32 * n_cols as f32) as usize;
+    let between_rows = Uniform::from(0..n_rows);
+    let between_cols = Uniform::from(0..n_cols);
+    for _ in 0..n {
+        let row = between_rows.sample(&mut rng);
+        let col = between_cols.sample(&mut rng);
+        match ind.cells[row][col].state {
+            State::Alive => ind.cells[row][col].state = State::Dead,
+            State::Dead => ind.cells[row][col].state = State::Alive,
+        };
+    }
+    ind
 }
 
 #[derive(Clone,Debug)]
