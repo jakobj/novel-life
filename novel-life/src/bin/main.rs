@@ -3,25 +3,56 @@ use crossterm::{cursor, ExecutableCommand};
 use rand::distributions::{Distribution, Uniform};
 
 fn main() {
-//     let s = "........
-// .##.....
-// .##.....
-// ...##...
-// ...##...
-// ........";
-    // let universe = parse(s);
+    let mut archive = Vec::new();
+    let mut parents = vec![Individual::new(5); 4];
+    for _ in 0..10 {
+        let mut offspring = parents.clone();
+        for i in 0..offspring.len() {
+            offspring[i] = mutate(&offspring[i], 0.1);
 
-    let universe = Universe{ cells: vec![vec![LCell{ state: State::Dead }; 30]; 30] };
-    let individual = Individual{ cells: vec![vec![LCell{ state: State::Dead }; 5]; 5] };
-    let individual = mutate(&individual, 0.1);
-    let universe = seed(&universe, &individual.cells, 12, 12);
-    let history = simulate_with_history(&universe, 100);
-    visualize(history);
+            let universe = Universe{ cells: vec![vec![LCell{ state: State::Dead }; 30]; 30] };
+            let universe = seed(&universe, &offspring[i].cells, 12, 12);
+            let universe = simulate(&universe, 100);
+
+            let mut distances = archive.iter().map(|u| compute_distance(u, &universe)).collect::<Vec<f32>>();
+            distances.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
+            offspring[i].fitness = distances[..4].iter().sum::<f32>();
+
+            archive.push(universe);
+        }
+        let mut population = parents.clone();
+        population.append(&mut offspring);
+        population.sort_unstable_by(|a, b| a.fitness.partial_cmp(&b.fitness).unwrap());
+
+        parents = population[..4].to_vec();
+    }
+}
+
+fn compute_distance(u0: &Universe, u1: &Universe) -> f32 {
+    let mut sum = 0.0;
+    for i in 0..u0.cells.len() {
+        for j in 0..u0.cells[0].len() {
+            sum += match (u0.cells[i][j].state, u1.cells[i][j].state) {
+                (State::Alive, State::Alive) => 0.0,
+                (State::Alive, State::Dead) => 1.0,
+                (State::Dead, State::Alive) => 1.0,
+                (State::Dead, State::Dead) => 0.0,
+            };
+        }
+    }
+    sum
 }
 
 #[derive(Clone)]
 struct Individual {
     cells: Vec<Vec<LCell>>,
+    fitness: f32,
+}
+
+impl Individual {
+    fn new(size: usize) -> Self {
+        Self{ cells: vec![vec![LCell{ state: State::Dead }; size]; size], fitness: f32::MIN}
+    }
 }
 
 fn parse(s: &str) -> Universe {
