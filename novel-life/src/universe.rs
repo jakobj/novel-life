@@ -25,12 +25,24 @@ impl Universe {
         sum
     }
 
+    pub fn n_alive(&self) -> usize {
+        self.cells.iter().map(|l| l.iter().map(|&c| if c == LCell::Alive { 1 } else { 0 }).sum::<usize>()).sum()
+    }
+
     pub fn seed(&self, seed: &Vec<Vec<LCell>>, row_offset: usize, col_offset: usize) -> Self {
         let mut u = self.clone();
         for row in 0..seed.len() {
             for col in 0..seed[0].len() {
                 u.cells[row_offset + row][col_offset + col] = seed[row][col];
             }
+        }
+        u
+    }
+
+    pub fn simulate(&self, k: usize) -> Self {
+        let mut u = self.clone();
+        for _ in 0..k {
+            u = u.tick();
         }
         u
     }
@@ -49,7 +61,7 @@ impl Universe {
                         let y = row + delta_y;
                         let x = col + delta_x;
                         if (y >= 0 && y < n) && (x >= 0 && x < n) {
-                            if u.cells[y as usize][x as usize] == LCell::Alive {
+                            if self.cells[y as usize][x as usize] == LCell::Alive {
                                 n_alive += 1;
                             }
                         }
@@ -79,6 +91,17 @@ impl Universe {
     // }
 }
 
+impl From<&str> for Universe {
+    fn from(s: &str) -> Self {
+        let cells = s.lines().map(|l| l.chars().map(|c| LCell::from(c) ).collect::<Vec<LCell>>()).collect::<Vec<Vec<LCell>>>();
+        let n = cells.len();
+        for v in cells.iter() {
+            assert!(v.len() == n);
+        }
+        Universe{ cells }
+    }
+}
+
 impl std::fmt::Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = String::new();
@@ -87,5 +110,57 @@ impl std::fmt::Display for Universe {
             s.push_str("\n");
         }
         write!(f, "{}", s)
+    }
+}
+
+impl Eq for Universe {}
+
+impl PartialEq for Universe {
+    fn eq(&self, other: &Self) -> bool {
+        self.cells == other.cells
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_patterns() {
+        let u = Universe::from(".....
+.....
+.###.
+.....
+.....");
+        let u_expected = Universe::from(".....
+..#..
+..#..
+..#..
+.....");
+        let u = u.tick();
+        assert_eq!(u, u_expected);
+
+        let u = Universe::from("..........
+..........
+..........
+..........
+...###....
+......#...
+...#......
+....#.#...
+....#..#..
+..........");
+        let u_expected = Universe::from("..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........
+..........");
+        let u = u.simulate(10);
+        assert_eq!(u, u_expected);
     }
 }

@@ -6,35 +6,34 @@ use novel_life::{individual::Individual, universe::Universe};
 fn main() {
     let mut archive = Vec::new();
     let mut parents = vec![Individual::new(5); 4];
-    for _ in 0..10 {
+    for _ in 0..50 {
         let mut offspring = parents.clone();
         for i in 0..offspring.len() {
             offspring[i] = offspring[i].mutate(1);
 
-            let universe = Universe::new(30);
-            let universe = universe.seed(&offspring[i].cells, 12, 12);
-            let universe = simulate(&universe, 100);
+            let universe = Universe::new(100);
+            let universe = universe.seed(&offspring[i].cells, 48, 48);
+            let universe = universe.simulate(500);
+            if universe.n_alive() > 100 {
+                println!("{}", universe.n_alive());
+                println!("{:?}", offspring[i].cells);
+                println!("{}", universe);
+            }
 
             let mut distances = archive.iter().map(|u: &Universe| u.distance(&universe)).collect::<Vec<u32>>();
-            distances.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap());
-            offspring[i].novelty = distances[..4].iter().sum::<u32>();
+            distances.sort_unstable();
+            if distances.len() >= 4 {
+                offspring[i].novelty = distances[..4].iter().sum::<u32>();
+            }
 
             archive.push(universe);
         }
-        let mut population = parents.clone();
-        population.append(&mut offspring);
+        let mut population = offspring.clone();
+        population.append(&mut parents);
         population.sort_unstable_by_key(|a| a.novelty);
 
         parents = population[..4].to_vec();
     }
-}
-
-fn simulate(u: &Universe, k: usize) -> Universe {
-    let mut u = u.clone();
-    for _ in 0..k {
-        u = u.tick();
-    }
-    u
 }
 
 // fn simulate_with_history(u: &Universe, k: usize) -> Vec<Universe> {
