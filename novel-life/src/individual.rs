@@ -10,7 +10,10 @@ pub struct Individual {
 
 impl Individual {
     pub fn new(size: usize) -> Self {
-        Self{ cells: vec![vec![LCell::Dead; size]; size], novelty: u32::MIN}
+        Self {
+            cells: vec![vec![LCell::Dead; size]; size],
+            novelty: u32::MIN,
+        }
     }
 
     pub fn mutate(&self, n_mutations: usize) -> Self {

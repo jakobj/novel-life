@@ -1,11 +1,15 @@
-use std::io::Write;
 use crossterm::{cursor, ExecutableCommand};
+use std::io::Write;
 
-use novel_life::{individual::Individual, lcell::LCell, universe::{Universe, self}};
+use novel_life::{
+    individual::Individual,
+    lcell::LCell,
+    universe::{self, Universe},
+};
 
 fn main() {
     let universe_size = 55;
-    let seed_size = 4;
+    let seed_size = 6;
     let n_ea_steps = 100;
     let n_simulation_steps = 500;
 
@@ -46,7 +50,10 @@ fn novelty_search(
                 discoveries.push(offspring[i].cells.clone());
             }
 
-            let mut distances = archive.iter().map(|u: &Universe| u.distance(&universe)).collect::<Vec<u32>>();
+            let mut distances = archive
+                .iter()
+                .map(|u: &Universe| u.distance(&universe))
+                .collect::<Vec<u32>>();
             distances.sort_unstable();
             if distances.len() >= 4 {
                 offspring[i].novelty = distances[..4].iter().sum::<u32>();

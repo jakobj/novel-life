@@ -1,13 +1,15 @@
 use crate::lcell::LCell;
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 pub struct Universe {
     cells: Vec<Vec<LCell>>,
 }
 
 impl Universe {
     pub fn new(size: usize) -> Self {
-        Self{ cells: vec![vec![LCell::Dead; size]; size] }
+        Self {
+            cells: vec![vec![LCell::Dead; size]; size],
+        }
     }
 
     pub fn distance(&self, other: &Self) -> u32 {
@@ -26,7 +28,14 @@ impl Universe {
     }
 
     pub fn n_alive(&self) -> usize {
-        self.cells.iter().map(|l| l.iter().map(|&c| if c == LCell::Alive { 1 } else { 0 }).sum::<usize>()).sum()
+        self.cells
+            .iter()
+            .map(|l| {
+                l.iter()
+                    .map(|&c| if c == LCell::Alive { 1 } else { 0 })
+                    .sum::<usize>()
+            })
+            .sum()
     }
 
     pub fn seed(&self, seed: &Vec<Vec<LCell>>, row_offset: usize, col_offset: usize) -> Self {
@@ -61,8 +70,8 @@ impl Universe {
     pub fn tick(&self) -> Self {
         let mut u = self.clone();
         let size = u.cells.len() as i32;
-        for i in 1..size-1 {
-            for j in 1..size-1 {
+        for i in 1..size - 1 {
+            for j in 1..size - 1 {
                 let mut n_alive = 0;
                 for delta_y in [-1, 0, 1] {
                     for delta_x in [-1, 0, 1] {
@@ -93,12 +102,15 @@ impl Universe {
 
 impl From<&str> for Universe {
     fn from(s: &str) -> Self {
-        let cells = s.lines().map(|l| l.chars().map(|c| LCell::from(c) ).collect::<Vec<LCell>>()).collect::<Vec<Vec<LCell>>>();
+        let cells = s
+            .lines()
+            .map(|l| l.chars().map(|c| LCell::from(c)).collect::<Vec<LCell>>())
+            .collect::<Vec<Vec<LCell>>>();
         let size = cells.len();
         for v in cells.iter() {
             assert!(v.len() == size);
         }
-        Universe{ cells }
+        Universe { cells }
     }
 }
 
@@ -141,20 +153,25 @@ mod test {
 
     #[test]
     fn test_patterns() {
-        let u = Universe::from(".....
+        let u = Universe::from(
+            ".....
 .....
 .###.
 .....
-.....");
-        let u_expected = Universe::from(".....
+.....",
+        );
+        let u_expected = Universe::from(
+            ".....
 ..#..
 ..#..
 ..#..
-.....");
+.....",
+        );
         let u = u.tick();
         assert_eq!(u, u_expected);
 
-        let u = Universe::from("..........
+        let u = Universe::from(
+            "..........
 ..........
 ..........
 ..........
@@ -163,8 +180,10 @@ mod test {
 ...#......
 ....#.#...
 ....#..#..
-..........");
-        let u_expected = Universe::from("..........
+..........",
+        );
+        let u_expected = Universe::from(
+            "..........
 ..........
 ..........
 ..........
@@ -173,7 +192,8 @@ mod test {
 ..........
 ..........
 ..........
-..........");
+..........",
+        );
         let u = u.simulate(10);
         assert_eq!(u, u_expected);
     }
