@@ -4,13 +4,13 @@ use std::io::Write;
 use novel_life::{
     individual::Individual,
     lcell::LCell,
-    universe::{self, Universe},
+    universe::Universe,
 };
 
 fn main() {
-    let universe_size = 55;
-    let seed_size = 6;
-    let n_ea_steps = 100;
+    let universe_size = 52;
+    let seed_size = 3;
+    let n_ea_steps = 1_000;
     let n_simulation_steps = 500;
 
     let discoveries = novelty_search(universe_size, seed_size, n_ea_steps, n_simulation_steps);
@@ -31,7 +31,7 @@ fn novelty_search(
     n_simulation_steps: usize,
 ) -> Vec<Vec<Vec<LCell>>> {
     fn interesting(u: &Universe) -> bool {
-        u.n_alive() > 110
+        u.n_alive() > 20 && u.symmetry() > 10
     }
 
     let mut discoveries = Vec::new();

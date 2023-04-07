@@ -67,6 +67,25 @@ impl Universe {
         history
     }
 
+    pub fn symmetry(&self) -> u32 {
+        if self.cells.len() % 2 == 0 {
+            let mut s = 0;
+            let n = self.cells.len();
+            let n2 = n / 2;
+            for i in 0..self.cells.len() {
+                for j in 0..n2 {
+                    if self.cells[i][j] == LCell::Alive
+                        && self.cells[i][j] == self.cells[i][(n as i32 - 1 - j as i32) as usize] {
+                        s += 1;
+                    }
+                }
+            }
+            s
+        } else {
+            todo!();
+        }
+    }
+
     pub fn tick(&self) -> Self {
         let mut u = self.clone();
         let size = u.cells.len() as i32;
@@ -196,5 +215,18 @@ mod test {
         );
         let u = u.simulate(10);
         assert_eq!(u, u_expected);
+    }
+
+    #[test]
+    fn test_symmetry() {
+        let u = Universe::from(
+            "......
+......
+##..##
+..##..
+......
+......",
+        );
+        assert_eq!(u.symmetry(), 3);
     }
 }
