@@ -61,31 +61,29 @@ impl Universe {
     pub fn tick(&self) -> Self {
         let mut u = self.clone();
         let size = u.cells.len() as i32;
-        for row in 0..size {
-            for col in 0..size {
+        for i in 1..size-1 {
+            for j in 1..size-1 {
                 let mut n_alive = 0;
                 for delta_y in [-1, 0, 1] {
                     for delta_x in [-1, 0, 1] {
                         if delta_y == 0 && delta_x == 0 {
                             continue;
                         }
-                        let y = row + delta_y;
-                        let x = col + delta_x;
-                        if (y >= 0 && y < size) && (x >= 0 && x < size) {
-                            if self.cells[y as usize][x as usize] == LCell::Alive {
-                                n_alive += 1;
-                            }
+                        let y = i + delta_y;
+                        let x = j + delta_x;
+                        if self.cells[y as usize][x as usize] == LCell::Alive {
+                            n_alive += 1;
                         }
                     }
                 }
                 if n_alive < 2 {
-                    u.cells[row as usize][col as usize] = LCell::Dead;
+                    u.cells[i as usize][j as usize] = LCell::Dead;
                 } else if n_alive == 2 {
                     // keep cell in its current state
                 } else if n_alive == 3 {
-                    u.cells[row as usize][col as usize] = LCell::Alive;
+                    u.cells[i as usize][j as usize] = LCell::Alive;
                 } else {
-                    u.cells[row as usize][col as usize] = LCell::Dead;
+                    u.cells[i as usize][j as usize] = LCell::Dead;
                 }
             }
         }
