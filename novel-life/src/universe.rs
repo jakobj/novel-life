@@ -107,10 +107,24 @@ impl From<&str> for Universe {
 impl std::fmt::Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = String::new();
-        for v in self.cells.iter() {
-            s.push_str(&v.iter().map(|c| c.to_string()).collect::<String>());
-            s.push_str("\n");
+        s.push('┌');
+        for _ in 0..self.cells.len() {
+            s.push('─');
         }
+        s.push('┐');
+        s.push('\n');
+        for v in self.cells.iter() {
+            s.push('│');
+            s.push_str(&v.iter().map(|c| c.to_string()).collect::<String>());
+            s.push('│');
+            s.push('\n');
+        }
+        s.push('└');
+        for _ in 0..self.cells.len() {
+            s.push('─');
+        }
+        s.push('┘');
+        s.push('\n');
         write!(f, "{}", s)
     }
 }

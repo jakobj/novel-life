@@ -9,8 +9,8 @@ pub enum LCell {
 impl fmt::Display for LCell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Alive => write!(f, "#"),
-            Self::Dead => write!(f, "."),
+            Self::Alive => write!(f, "■"),
+            Self::Dead => write!(f, " "),
         }
     }
 }
