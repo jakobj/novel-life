@@ -96,7 +96,11 @@ pub fn seed(u: &Universe, seed: &Vec<Vec<LCell>>) -> Universe {
 pub fn simulate(u: &Universe, k: usize) -> Universe {
     let mut u = u.clone();
     for _ in 0..k {
-        u = tick(&u);
+        let u_new = tick(&u);
+        if u_new == u {
+            return u_new;
+        }
+        u = u_new;
     }
     u
 }
@@ -106,7 +110,11 @@ pub fn simulate_with_history(u: &Universe, k: usize) -> Vec<Universe> {
     let mut history = Vec::new();
     history.push(u.clone());
     for _ in 0..k {
-        u = tick(&u);
+        let u_new = tick(&u);
+        if u_new == u {
+            return history;
+        }
+        u = u_new;
         history.push(u.clone())
     }
     history
