@@ -260,4 +260,28 @@ mod test {
         );
         assert_eq!(compute_distance(&u0, &u1), 4);
     }
+
+    #[test]
+    fn test_seed() {
+        let u = Universe::from(
+            "......
+......
+......
+......
+......
+......",
+        );
+        let u_expected = Universe::from(
+            "......
+.#..#.
+.#..#.
+.#..#.
+.#..#.
+......",
+        );
+        let u = seed(&u, &vec![vec![LCell::Alive, LCell::Dead, LCell::Dead, LCell::Alive]; 4]);
+        println!("{}", u);
+        println!("{}", u_expected);
+        assert_eq!(u, u_expected);
+    }
 }
