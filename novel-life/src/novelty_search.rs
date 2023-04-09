@@ -1,6 +1,6 @@
 use rand::{distributions::Uniform, prelude::Distribution};
 
-use crate::{lcell::LCell, universe::Universe};
+use crate::{lcell::LCell, universe::{self, Universe}};
 
 pub fn novelty_search(
     universe_size: usize,
@@ -9,7 +9,7 @@ pub fn novelty_search(
     n_simulation_steps: usize,
 ) -> Vec<Vec<Vec<LCell>>> {
     fn interesting(u: &Universe) -> bool {
-        u.n_alive() > 20 && u.symmetry() > 10
+        universe::count_alive_cells(&u) > 20 && universe::measure_symmetry(&u) > 10
     }
 
     let n_offspring = 6;
@@ -35,9 +35,8 @@ pub fn novelty_search(
 
             // compute final state of universe
             let universe = Universe::new(universe_size);
-            let offset = universe_size / 2 - seed_size / 2;
-            let universe = universe.seed(&cells, offset, offset);
-            let universe = universe.simulate(n_simulation_steps);
+            let universe = universe::seed(&universe, &cells);
+            let universe = universe::simulate(&universe, n_simulation_steps);
             if interesting(&universe) {
                 discoveries.push(cells.clone());
             }
@@ -45,7 +44,7 @@ pub fn novelty_search(
             // compute novelty as total distance from four closest neighbors
             let mut distances = archive
                 .iter()
-                .map(|u: &Universe| u.distance(&universe))
+                .map(|u: &Universe| universe::distance(&u, &universe))
                 .collect::<Vec<u32>>();
             distances.sort_unstable();
             let novelty;

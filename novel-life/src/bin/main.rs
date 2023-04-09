@@ -1,7 +1,7 @@
 use crossterm::{cursor, ExecutableCommand};
 use std::io::Write;
 
-use novel_life::{novelty_search, universe::Universe};
+use novel_life::{novelty_search, universe::{self, Universe}};
 
 fn main() {
     let universe_size = 52;
@@ -14,9 +14,8 @@ fn main() {
 
     for cells in discoveries {
         let u = Universe::new(universe_size);
-        let offset = universe_size / 2 - seed_size / 2;
-        let u = u.seed(&cells, offset, offset);
-        let history = u.simulate_with_history(n_simulation_steps);
+        let u = universe::seed(&u, &cells);
+        let history = universe::simulate_with_history(&u, n_simulation_steps);
         visualize(history);
     }
 }
