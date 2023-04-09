@@ -11,7 +11,6 @@ impl Universe {
             cells: vec![vec![LCell::Dead; size]; size],
         }
     }
-
 }
 
 impl From<&str> for Universe {

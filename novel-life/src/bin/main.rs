@@ -1,21 +1,47 @@
+use clap::Parser;
 use crossterm::{cursor, ExecutableCommand};
 use std::io::Write;
 
-use novel_life::{novelty_search, universe::{self, Universe}};
+use novel_life::{
+    novelty_search,
+    universe::{self, Universe},
+};
+
+/// Discover interesting seeds for the Game of Life
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Size of the (square) universe
+    #[arg(short, long, default_value_t = 42)]
+    universe_size: usize,
+
+    /// Size of the (square) seed
+    #[arg(short, long, default_value_t = 3)]
+    seed_size: usize,
+
+    /// Number of generations for the EA
+    #[arg(short, long, default_value_t = 200)]
+    generations: usize,
+
+    /// Number of simulation steps per universe
+    #[arg(short, long, default_value_t = 500)]
+    n_simulation_steps: usize,
+}
 
 fn main() {
-    let universe_size = 52;
-    let seed_size = 3;
-    let n_ea_steps = 200;
-    let n_simulation_steps = 500;
+    let args = Args::parse();
 
-    let discoveries =
-        novelty_search::novelty_search(universe_size, seed_size, n_ea_steps, n_simulation_steps);
+    let discoveries = novelty_search::novelty_search(
+        args.universe_size,
+        args.seed_size,
+        args.generations,
+        args.n_simulation_steps,
+    );
 
     for cells in discoveries {
-        let u = Universe::new(universe_size);
+        let u = Universe::new(args.universe_size);
         let u = universe::seed(&u, &cells);
-        let history = universe::simulate_with_history(&u, n_simulation_steps);
+        let history = universe::simulate_with_history(&u, args.n_simulation_steps);
         visualize(history);
     }
 }
