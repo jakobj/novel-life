@@ -1,8 +1,8 @@
 use clap::Parser;
 use crossterm::{cursor, ExecutableCommand};
-use std::io::Write;
-use rand::{SeedableRng};
 use rand::rngs::StdRng;
+use rand::SeedableRng;
+use std::io::Write;
 
 use novel_life::{
     novelty_search,

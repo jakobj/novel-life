@@ -15,7 +15,7 @@ pub fn novelty_search(
     rng: &mut StdRng,
 ) -> Vec<Vec<Vec<LCell>>> {
     fn interesting(u: &Universe) -> bool {
-        universe::count_alive_cells(&u) > 20 && universe::measure_symmetry(&u) > 10
+        universe::count_alive_cells(u) > 20 && universe::measure_symmetry(u) > 10
     }
 
     let n_parents = 4;
@@ -55,15 +55,14 @@ pub fn novelty_search(
             // compute novelty as total distance from k closest neighbors
             let mut distances = archive
                 .iter()
-                .map(|u: &Universe| universe::compute_distance(&u, &universe))
+                .map(|u| universe::compute_distance(u, &universe))
                 .collect::<Vec<usize>>();
             distances.sort_unstable();
-            let novelty;
-            if distances.len() < k_nearest_neighbors {
-                novelty = usize::MIN;
+            let novelty = if distances.len() < k_nearest_neighbors {
+                usize::MIN
             } else {
-                novelty = distances[..k_nearest_neighbors].iter().sum::<usize>();
-            }
+                distances[..k_nearest_neighbors].iter().sum::<usize>()
+            };
 
             offspring.push(Individual { cells, novelty });
             archive.insert(universe);
@@ -83,8 +82,8 @@ struct Individual {
     novelty: usize,
 }
 
-fn mutate(cells: &Vec<Vec<LCell>>, n_mutations: usize, rng: &mut StdRng) -> Vec<Vec<LCell>> {
-    let mut cells = cells.clone();
+fn mutate(cells: &[Vec<LCell>], n_mutations: usize, rng: &mut StdRng) -> Vec<Vec<LCell>> {
+    let mut cells = cells.to_vec();
     let n = cells.len();
     let between = Uniform::from(0..n);
     for _ in 0..n_mutations {

@@ -1,6 +1,6 @@
 use crate::lcell::LCell;
 
-#[derive(Clone, Debug, Hash)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Universe {
     cells: Vec<Vec<LCell>>,
 }
@@ -17,7 +17,7 @@ impl From<&str> for Universe {
     fn from(s: &str) -> Self {
         let cells = s
             .lines()
-            .map(|l| l.chars().map(|c| LCell::from(c)).collect::<Vec<LCell>>())
+            .map(|l| l.chars().map(LCell::from).collect::<Vec<LCell>>())
             .collect::<Vec<Vec<LCell>>>();
         let size = cells.len();
         for v in cells.iter() {
@@ -49,14 +49,6 @@ impl std::fmt::Display for Universe {
         s.push('┘');
         s.push('\n');
         write!(f, "{}", s)
-    }
-}
-
-impl Eq for Universe {}
-
-impl PartialEq for Universe {
-    fn eq(&self, other: &Self) -> bool {
-        self.cells == other.cells
     }
 }
 
