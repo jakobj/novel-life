@@ -18,7 +18,7 @@ struct Args {
     universe_size: usize,
 
     /// Size of the (square) seed
-    #[arg(short, long, default_value_t = 3)]
+    #[arg(short, long, default_value_t = 4)]
     seed_size: usize,
 
     /// Number of generations for the EA
