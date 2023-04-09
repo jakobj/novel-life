@@ -54,6 +54,7 @@ fn main() {
     for cells in discoveries {
         let u = Universe::new(args.universe_size);
         let u = universe::seed(&u, &cells);
+        println!("Using seed:\n{}", Universe::from(&cells));
         let history = universe::simulate_with_history(&u, args.n_simulation_steps);
         visualize(history);
     }

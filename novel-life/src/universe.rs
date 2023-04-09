@@ -27,6 +27,12 @@ impl From<&str> for Universe {
     }
 }
 
+impl From<&Vec<Vec<LCell>>> for Universe {
+    fn from(cells: &Vec<Vec<LCell>>) -> Self {
+        Universe{ cells: cells.clone() }
+    }
+}
+
 impl std::fmt::Display for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut s = String::new();
