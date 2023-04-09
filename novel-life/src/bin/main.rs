@@ -1,6 +1,8 @@
 use clap::Parser;
 use crossterm::{cursor, ExecutableCommand};
 use std::io::Write;
+use rand::{SeedableRng};
+use rand::rngs::StdRng;
 
 use novel_life::{
     novelty_search,
@@ -26,16 +28,27 @@ struct Args {
     /// Number of simulation steps per universe
     #[arg(short, long, default_value_t = 500)]
     n_simulation_steps: usize,
+
+    /// Seed for the rng
+    #[arg(long)]
+    seed: Option<u64>,
 }
 
 fn main() {
     let args = Args::parse();
+
+    let mut rng = if let Some(seed) = args.seed {
+        StdRng::seed_from_u64(seed)
+    } else {
+        StdRng::from_rng(rand::thread_rng()).unwrap()
+    };
 
     let discoveries = novelty_search::novelty_search(
         args.universe_size,
         args.seed_size,
         args.generations,
         args.n_simulation_steps,
+        &mut rng,
     );
 
     for cells in discoveries {

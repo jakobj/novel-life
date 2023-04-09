@@ -1,4 +1,4 @@
-use rand::{distributions::Uniform, prelude::Distribution};
+use rand::{distributions::Uniform, prelude::Distribution, rngs::StdRng};
 
 use crate::{
     lcell::LCell,
@@ -10,6 +10,7 @@ pub fn novelty_search(
     seed_size: usize,
     generations: usize,
     n_simulation_steps: usize,
+    rng: &mut StdRng,
 ) -> Vec<Vec<Vec<LCell>>> {
     fn interesting(u: &Universe) -> bool {
         universe::count_alive_cells(&u) > 20 && universe::measure_symmetry(&u) > 10
@@ -29,15 +30,14 @@ pub fn novelty_search(
         };
         n_parents
     ];
-    let mut rng = rand::thread_rng();
     let between = Uniform::from(0..parents.len());
 
     for _ in 0..generations {
         let mut offspring = Vec::with_capacity(n_offspring);
         for _ in 0..n_offspring {
             // choose a random parent and mutate
-            let idx = between.sample(&mut rng);
-            let cells = mutate(&parents[idx].cells, n_mutations);
+            let idx = between.sample(rng);
+            let cells = mutate(&parents[idx].cells, n_mutations, rng);
 
             // compute final state of universe
             let universe = Universe::new(universe_size);
@@ -78,14 +78,13 @@ struct Individual {
     novelty: usize,
 }
 
-fn mutate(cells: &Vec<Vec<LCell>>, n_mutations: usize) -> Vec<Vec<LCell>> {
+fn mutate(cells: &Vec<Vec<LCell>>, n_mutations: usize, rng: &mut StdRng) -> Vec<Vec<LCell>> {
     let mut cells = cells.clone();
-    let mut rng = rand::thread_rng();
     let n = cells.len();
     let between = Uniform::from(0..n);
     for _ in 0..n_mutations {
-        let row = between.sample(&mut rng);
-        let col = between.sample(&mut rng);
+        let row = between.sample(rng);
+        let col = between.sample(rng);
         match cells[row][col] {
             LCell::Alive => cells[row][col] = LCell::Dead,
             LCell::Dead => cells[row][col] = LCell::Alive,
