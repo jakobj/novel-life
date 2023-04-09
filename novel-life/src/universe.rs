@@ -60,19 +60,17 @@ impl PartialEq for Universe {
     }
 }
 
-pub fn distance(u0: &Universe, u1: &Universe) -> u32 {
-    let mut sum = 0;
-    for i in 0..u0.cells.len() {
-        for j in 0..u0.cells[0].len() {
-            sum += match (u0.cells[i][j], u1.cells[i][j]) {
-                (LCell::Alive, LCell::Alive) => 0,
-                (LCell::Alive, LCell::Dead) => 1,
-                (LCell::Dead, LCell::Alive) => 1,
-                (LCell::Dead, LCell::Dead) => 0,
-            };
-        }
-    }
-    sum
+pub fn compute_distance(u0: &Universe, u1: &Universe) -> usize {
+    u0.cells
+        .iter()
+        .zip(u1.cells.iter())
+        .map(|(l0, l1)| {
+            l0.iter()
+                .zip(l1.iter())
+                .map(|(c0, c1)| if c0 == c1 { 0 } else { 1 })
+                .sum::<usize>()
+        })
+        .sum::<usize>()
 }
 
 pub fn count_alive_cells(u: &Universe) -> usize {
@@ -116,21 +114,25 @@ pub fn simulate_with_history(u: &Universe, k: usize) -> Vec<Universe> {
     history
 }
 
-pub fn measure_symmetry(u: &Universe) -> u32 {
+pub fn measure_symmetry(u: &Universe) -> usize {
     if u.cells.len() % 2 == 0 {
-        let mut s = 0;
-        let n = u.cells.len();
-        let n2 = n / 2;
-        for i in 0..u.cells.len() {
-            for j in 0..n2 {
-                if u.cells[i][j] == LCell::Alive
-                    && u.cells[i][j] == u.cells[i][(n as i32 - 1 - j as i32) as usize]
-                {
-                    s += 1;
-                }
-            }
-        }
-        s
+        let n2 = u.cells.len() / 2;
+        u.cells
+            .iter()
+            .map(|r| {
+                r.iter()
+                    .take(n2)
+                    .zip(r.iter().rev())
+                    .map(|(c0, c1)| {
+                        if *c0 == LCell::Alive && c0 == c1 {
+                            1
+                        } else {
+                            0
+                        }
+                    })
+                    .sum::<usize>()
+            })
+            .sum::<usize>()
     } else {
         todo!();
     }
@@ -230,5 +232,26 @@ mod test {
 ......",
         );
         assert_eq!(measure_symmetry(&u), 3);
+    }
+
+    #[test]
+    fn test_distance() {
+        let u0 = Universe::from(
+            "......
+......
+##..##
+..##..
+......
+......",
+        );
+        let u1 = Universe::from(
+            "......
+......
+##....
+..##..
+##....
+......",
+        );
+        assert_eq!(compute_distance(&u0, &u1), 4);
     }
 }
