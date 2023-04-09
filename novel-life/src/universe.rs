@@ -145,7 +145,7 @@ pub fn measure_symmetry(u: &Universe) -> usize {
 }
 
 pub fn tick(u: &Universe) -> Universe {
-    let mut new_u = u.clone();
+    let mut u_new = u.clone();
     let size = u.cells.len() as i32;
     for i in 1..size - 1 {
         for j in 1..size - 1 {
@@ -163,17 +163,17 @@ pub fn tick(u: &Universe) -> Universe {
                 }
             }
             if n_alive < 2 {
-                new_u.cells[i as usize][j as usize] = LCell::Dead;
+                u_new.cells[i as usize][j as usize] = LCell::Dead;
             } else if n_alive == 2 {
                 // keep cell in its current state
             } else if n_alive == 3 {
-                new_u.cells[i as usize][j as usize] = LCell::Alive;
+                u_new.cells[i as usize][j as usize] = LCell::Alive;
             } else {
-                new_u.cells[i as usize][j as usize] = LCell::Dead;
+                u_new.cells[i as usize][j as usize] = LCell::Dead;
             }
         }
     }
-    new_u
+    u_new
 }
 
 #[cfg(test)]
