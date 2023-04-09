@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use rand::{distributions::Uniform, prelude::Distribution, rngs::StdRng};
 
 use crate::{
@@ -22,7 +24,10 @@ pub fn novelty_search(
     let k_nearest_neighbors = 4;
 
     let mut discoveries = Vec::new();
-    let mut archive = Vec::new();
+    // we use a hashset as the archive, this gets the density wrong but
+    // accelerates the search; since the "behavioural" space is anyway large,
+    // the error in the estimate should not be too relevant
+    let mut archive = HashSet::new();
     let mut parents = vec![
         Individual {
             cells: vec![vec![LCell::Dead; seed_size]; seed_size],
@@ -61,7 +66,7 @@ pub fn novelty_search(
             }
 
             offspring.push(Individual { cells, novelty });
-            archive.push(universe);
+            archive.insert(universe);
         }
 
         // choose offspring with highest novelty

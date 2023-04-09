@@ -1,6 +1,6 @@
 use crate::lcell::LCell;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Hash)]
 pub struct Universe {
     cells: Vec<Vec<LCell>>,
 }
